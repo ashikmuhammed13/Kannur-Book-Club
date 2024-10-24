@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookstore Cart</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #1a237e;
+            --secondary-color: #e74c3c;
+            --accent-color: #f1c40f;
+            --text-color: #34495e;
+            --light-bg: #ecf0f1;
+            --dark-bg: #2c3e50;
+            --success-color: #27ae60;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-color);
+            background-color: var(--light-bg);
+            padding: 7rem;
+        }
+         /* Header Styles */
+         .navbar {
+            background-color: var(--primary-color);
+            padding: 1rem 0;
+            transition: all 0.3s ease;
+        }
+
+        .navbar.scrolled {
+            background-color: rgba(26, 35, 126, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .navbar-brand img {
+            height: 45px;
+            margin-right: 10px;
+        }
+
+        .search-form {
+            position: relative;
+            max-width: 500px;
+            width: 100%;
+        }
+
+        .search-form input {
+            border-radius: 25px;
+            padding: 0.75rem 2.5rem 0.75rem 1.5rem;
+            border: none;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .search-form input:focus {
+            box-shadow: 0 2px 20px rgba(0,0,0,0.2);
+        }
+
+        .search-form button {
+            position: absolute;
+            right: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            border: none;
+            background: none;
+            color: var(--primary-color);
+        }
+
+        .cart-container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .cart-header {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .cart-item {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .book-image {
+            width: 120px;
+            height: 160px;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .book-title {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .quantity-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .quantity-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .quantity-btn:hover {
+            background-color: var(--dark-bg);
+        }
+
+        .cart-summary {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+        }
+
+        .checkout-btn {
+            background-color: var(--success-color);
+            color: white;
+            border: none;
+            padding: 1rem;
+            border-radius: 4px;
+            width: 100%;
+            font-weight: 600;
+            transition: background-color 0.3s;
+        }
+
+        .checkout-btn:hover {
+            background-color: #219a52;
+        }
+
+        .remove-btn {
+            color: var(--secondary-color);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .remove-btn:hover {
+            color: #c0392b;
+        }
+
+        .save-for-later {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .save-for-later:hover {
+            color: var(--dark-bg);
+        }
+
+        .shipping-option {
+            padding: 1rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 1rem;
+            cursor: pointer;
+            transition: border-color 0.3s;
+        }
+
+        .shipping-option:hover {
+            border-color: var(--primary-color);
+        }
+
+        .shipping-option.selected {
+            border-color: var(--primary-color);
+            background-color: #f8f9fa;
+        }
+
+        .stock-warning {
+            color: var(--secondary-color);
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .promo-code {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #ddd;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="/api/placeholder/45/45" alt="Logo"> Kannur Book Club
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <form class="search-form mx-auto">
+                    <input type="search" class="form-control" placeholder="Search books, authors, ISBN...">
+                    <button type="submit"><i class="fas fa-search"></i></button>
+                </form>
+                <div class="ms-auto">
+                    <a href="#" class="btn btn-outline-light me-2"><i class="fas fa-heart"></i> Wishlist</a>
+                    <a href="#" class="btn btn-outline-light me-2"><i class="fas fa-shopping-cart"></i> Cart</a>
+                    <a href="#" class="btn btn-light"><i class="fas fa-user"></i> Login</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="cart-container">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="cart-header">
+                    <h2 class="mb-0">Shopping Cart (2 items)</h2>
+                </div>
+
+                <!-- Cart Item 1 -->
+                <div class="cart-item">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <img src="/api/placeholder/120/160" alt="Book cover" class="book-image">
+                        </div>
+                        <div class="col-md-6">
+                            <h3 class="book-title">The Great Gatsby</h3>
+                            <p class="mb-1">Author: F. Scott Fitzgerald</p>
+                            <p class="mb-1">Format: Hardcover</p>
+                            <p class="mb-2">Seller: Premium Books</p>
+                            <div class="d-flex gap-3">
+                                <a href="#" class="remove-btn"><i class="fas fa-trash"></i> Remove</a>
+                                <a href="#" class="save-for-later"><i class="far fa-bookmark"></i> Save for later</a>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="quantity-control">
+                                <button class="quantity-btn">-</button>
+                                <span>1</span>
+                                <button class="quantity-btn">+</button>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <h4 class="mb-0">$24.99</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cart Item 2 -->
+                <div class="cart-item">
+                    <div class="row align-items-center">
+                        <div class="col-md-2">
+                            <img src="/api/placeholder/120/160" alt="Book cover" class="book-image">
+                        </div>
+                        <div class="col-md-6">
+                            <h3 class="book-title">1984</h3>
+                            <p class="mb-1">Author: George Orwell</p>
+                            <p class="mb-1">Format: Paperback</p>
+                            <p class="mb-2">Seller: BookMart</p>
+                            <p class="stock-warning mb-2"><i class="fas fa-exclamation-circle"></i> Only 2 left in stock</p>
+                            <div class="d-flex gap-3">
+                                <a href="#" class="remove-btn"><i class="fas fa-trash"></i> Remove</a>
+                                <a href="#" class="save-for-later"><i class="far fa-bookmark"></i> Save for later</a>
+                            </div>
+                        </div>
+                        <div class="col-md-2">
+                            <div class="quantity-control">
+                                <button class="quantity-btn">-</button>
+                                <span>1</span>
+                                <button class="quantity-btn">+</button>
+                            </div>
+                        </div>
+                        <div class="col-md-2 text-end">
+                            <h4 class="mb-0">$19.99</h4>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shipping Options -->
+                <div class="cart-item">
+                    <h3 class="mb-3">Shipping Options</h3>
+                    <div class="shipping-option selected">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="shipping" id="free-shipping" checked>
+                            <label class="form-check-label" for="free-shipping">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-1">Free Shipping</h5>
+                                        <p class="mb-0 text-muted">Delivery by Wed, Oct 30</p>
+                                    </div>
+                                    <span class="text-success">FREE</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="shipping-option">
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="shipping" id="express-shipping">
+                            <label class="form-check-label" for="express-shipping">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-1">Express Shipping</h5>
+                                        <p class="mb-0 text-muted">Delivery by Mon, Oct 28</p>
+                                    </div>
+                                    <span>$9.99</span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="col-lg-4">
+                <div class="cart-summary">
+                    <h3 class="mb-4">Order Summary</h3>
+                    <div class="summary-item">
+                        <span>Subtotal (2 items)</span>
+                        <span>$44.98</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Shipping</span>
+                        <span class="text-success">FREE</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Estimated Tax</span>
+                        <span>$3.60</span>
+                    </div>
+                    <div class="summary-item">
+                        <strong>Total</strong>
+                        <strong>$48.58</strong>
+                    </div>
+
+                    <div class="promo-code">
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Enter promo code">
+                            <button class="btn btn-outline-primary" type="button">Apply</button>
+                        </div>
+                    </div>
+
+                    <button class="checkout-btn mt-3">
+                        Continue to Checkout
+                    </button>
+
+                    <div class="mt-3 text-center">
+                        <small class="text-muted">
+                            <i class="fas fa-lock me-1"></i> Secure checkout
+                        </small>
+                    </div>
+                </div>
+
+                <!-- Recommended Items -->
+                <div class="cart-summary mt-3">
+                    <h4 class="mb-3">You might also like</h4>
+                    <div class="recommended-item d-flex align-items-center mb-3">
+                        <img src="/api/placeholder/60/80" alt="Book cover" class="me-3" style="width: 60px; height: 80px; object-fit: cover; border-radius: 4px;">
+                        <div>
+                            <h6 class="mb-1">Animal Farm</h6>
+                            <p class="mb-1 text-muted">George Orwell</p>
+                            <strong>$15.99</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Quantity control
+        document.querySelectorAll('.quantity-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const span = this.parentElement.querySelector('span');
+                let quantity = parseInt(span.textContent);
+                
+                if (this.textContent === '+' && quantity < 10) {
+                    span.textContent = quantity + 1;
+                } else if (this.textContent === '-' && quantity > 1) {
+                    span.textContent = quantity - 1;
+                }
+            });
+        });
+
+        // Shipping option selection
+        document.querySelectorAll('.shipping-option').forEach(option => {
+            option.addEventListener('click', function() {
+                document.querySelectorAll('.shipping-option').forEach(opt => {
+                    opt.classList.remove('selected');
+                });
+                this.classList.add('selected');
+                const radio = this.querySelector('input[type="radio"]');
+                radio.checked = true;
+            });
+        });
+
+        // Remove item functionality
+        document.querySelectorAll('.remove-btn').forEach(button => {
+            button.addEventListener('click', function(e) {
+                e.preventDefault();
+                if(confirm('Are you sure you want to remove this item?')) {
+                    this.closest('.cart-item').remove();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
